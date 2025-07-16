@@ -1,11 +1,6 @@
 require('dotenv').config();
+const { Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ActivityType, PresenceUpdateStatus } = require('discord.js');
 const express = require('express');
-const {
-  Client, GatewayIntentBits,
-  Partials, EmbedBuilder,
-  ActionRowBuilder, ButtonBuilder,
-  ButtonStyle, ActivityType, PresenceUpdateStatus
-} = require('discord.js');
 
 const app = express();
 app.get('/', (req, res) => res.send('✅ Bot is alive!'));
@@ -21,22 +16,14 @@ const client = new Client({
   partials: [Partials.Channel]
 });
 
-client.on('ready', () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
-  client.user.setPresence({
-    activities: [{ name: 'PLRP', type: ActivityType.Playing }],
-    status: PresenceUpdateStatus.DoNotDisturb
-  });
-  sendPromotion();
-  setInterval(sendPromotion, 5 * 60 * 1000);
-});
-
 const FULL_ACCESS_ROLE = '1394974811490619442';
 const ANNOUNCEMENT_CHANNEL_ID = '1391556047990292621';
 const MEETING_CHANNEL_ID = '1391556054327890071';
 const STARK_MENU_CHANNEL_ID = '1391556049273749625';
 const PROMOTION_CHANNEL_ID = '1395008017044602890';
 const TICKET_CATEGORIES = ['1391556033704362064', '1391556034698547200'];
+const gangTasks = new Map();
+
 const PROMOTION_QUOTES = [
   '⦿ الزعامة فن، والفرصة بين يديك.',
   '⦿ كن أنت القائد الذي لا يُنسى.',
@@ -64,6 +51,17 @@ const PROMOTION_QUOTES = [
   '⦿ القيادة قرار، فهل قررت؟',
   '⦿ العصابة حلم.. والزعامة قرار.'
 ];
+
+client.on('ready', () => {
+  console.log(`✅ Logged in as ${client.user.tag}`);
+  client.user.setPresence({
+    activities: [{ name: 'PLRP', type: ActivityType.Playing }],
+    status: PresenceUpdateStatus.DoNotDisturb
+  });
+
+  sendPromotion();
+  setInterval(sendPromotion, 5 * 60 * 1000);
+});
 
 function sendPromotion() {
   const channel = client.channels.cache.get(PROMOTION_CHANNEL_ID);
@@ -74,168 +72,18 @@ function sendPromotion() {
     .setDescription(`**${random}**`)
     .setImage('https://media.discordapp.net/attachments/1386276858319998976/1394844422184636428/IMG_8322.jpg')
     .setColor('#8B0000');
-
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setLabel('موقع العائلة')
       .setStyle(ButtonStyle.Link)
       .setURL('https://media.discordapp.net/attachments/1386276858319998976/1394844422184636428/IMG_8322.jpg')
   );
-
   channel.send({ embeds: [embed], components: [row] });
 }
-
-client.login(process.env.TOKEN);
-require('dotenv').config();
-const express = require('express');
-const {
-  Client, GatewayIntentBits,
-  Partials, EmbedBuilder,
-  ActionRowBuilder, ButtonBuilder,
-  ButtonStyle, ActivityType, PresenceUpdateStatus
-} = require('discord.js');
-
-const app = express();
-app.get('/', (req, res) => res.send('✅ Bot is alive!'));
-app.listen(3000, () => console.log('🌐 Uptime server is running.'));
-
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers
-  ],
-  partials: [Partials.Channel]
-});
-
-client.on('ready', () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
-  client.user.setPresence({
-    activities: [{ name: 'PLRP', type: ActivityType.Playing }],
-    status: PresenceUpdateStatus.DoNotDisturb
-  });
-  sendPromotion();
-  setInterval(sendPromotion, 5 * 60 * 1000); // كل 5 دقايق
-});
-
-const FULL_ACCESS_ROLE = '1394974811490619442';
-const ANNOUNCEMENT_CHANNEL_ID = '1391556047990292621';
-const MEETING_CHANNEL_ID = '1391556054327890071';
-const STARK_MENU_CHANNEL_ID = '1391556049273749625';
-const PROMOTION_CHANNEL_ID = '1395008017044602890';
-const PROMOTION_QUOTES = [
-  '⦿ الزعامة فن، والفرصة بين يديك.',
-  '⦿ كن أنت القائد الذي لا يُنسى.',
-  '⦿ العصابة تنتظرك.. فلا تتأخر.',
-  '⦿ لا أحد يصنع المجد إلا الزعماء.',
-  '⦿ الزعيم لا يُخلق، بل يُثبت نفسه.',
-  '⦿ فرصتك لتكتب اسمك في تاريخ العصابات.',
-  '⦿ لا تتردد، العصابة تنتظر زعيمها.',
-  '⦿ هل لديك الشجاعة لتقود؟',
-  '⦿ الزعامة موقف، وليست منصباً.',
-  '⦿ العصابة القوية تبدأ بفكرة.. وتنتهي بأسطورة.',
-  '⦿ استعد، المجد بانتظارك.',
-  '⦿ القادة لا يولدون.. بل يُختارون.',
-  '⦿ اليوم قائد.. غداً أسطورة.',
-  '⦿ لا تكون تابعاً، كن زعيماً.',
-  '⦿ لا تحتاج إذناً لتبدأ.. فقط ابدأ.',
-  '⦿ العصابات العظيمة تُبنى بالشخصيات العظيمة.',
-  '⦿ لا تنتظر الفرصة.. اصنعها.',
-  '⦿ عش الزعامة، ولا تتقمصها.',
-  '⦿ حين تبدأ عصابتك.. يبدأ المجد.',
-  '⦿ اثبت وجودك، وابدأ عصابتك.',
-  '⦿ في كل زقاق.. زعيم ينتظر.',
-  '⦿ الزعامة لا تعني القوة.. بل السيطرة.',
-  '⦿ افتح عصابتك.. واحكم الشارع.',
-  '⦿ القيادة قرار، فهل قررت؟',
-  '⦿ العصابة حلم.. والزعامة قرار.'
-];
-
-function sendPromotion() {
-  const channel = client.channels.cache.get(PROMOTION_CHANNEL_ID);
-  if (!channel?.isTextBased()) return;
-  const random = PROMOTION_QUOTES[Math.floor(Math.random() * PROMOTION_QUOTES.length)];
-  const embed = new EmbedBuilder()
-    .setTitle('🔥 هل أنت مستعد لتكون زعيم؟')
-    .setDescription(`**${random}**`)
-    .setColor('#8B0000');
-
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setLabel('موقع العائلة')
-      .setStyle(ButtonStyle.Link)
-      .setURL('https://media.discordapp.net/attachments/1386276858319998976/1394844422184636428/IMG_8322.jpg')
-  );
-
-  channel.send({ embeds: [embed], components: [row] });
-}
-
-// باقي الكود بدون تغيير...
-require('dotenv').config();
-const express = require('express');
-const {
-  Client, GatewayIntentBits,
-  Partials, EmbedBuilder,
-  ActionRowBuilder, ButtonBuilder,
-  ButtonStyle
-} = require('discord.js');
-
-const app = express();
-app.get('/', (req, res) => res.send('✅ Bot is alive!'));
-app.listen(3000, () => console.log('🌐 Uptime server is running.'));
-
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers
-  ],
-  partials: [Partials.Channel]
-});
-
-client.on('ready', () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
-  client.user.setActivity('By Lormes', {
-    type: 1,
-    url: 'https://twitch.tv/discord'
-  });
-});
-
-const FULL_ACCESS_ROLE = '1394974811490619442';
-const ANNOUNCEMENT_CHANNEL_ID = '1391556047990292621';
-const MEETING_CHANNEL_ID = '1391556054327890071';
-const STARK_MENU_CHANNEL_ID = '1391556049273749625';
-const TICKET_CATEGORIES = ['1391556033704362064', '1391556034698547200'];
-const gangTasks = new Map();
 
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
   const isFullAccess = message.member.roles.cache.has(FULL_ACCESS_ROLE);
-
-  if (message.content === '-تقديم') {
-    await message.channel.send(`**تقديم عصابة:**\nاسمك: ..........\nعمرك: ..........\nهل عندك هوية: ..........\nخبراتك: ..........\nالعصابة المختارة: ..........\nهل انت داخل السيرفر الأساسي؟ ..........`);
-  }
-
-  if (message.content === '-فتح-عصابة') {
-    await message.channel.send(`**فتح عصابة:**\nاسمك: ..........\nاسم العصابة: ..........\nاللون: ..........\nالشروط: ..........\nعدد الأعضاء: ..........\nالالتزام: ..........\nهل تابع لعائلة ستارك؟ ..........\nملاحظات: ..........`);
-  }
-
-  if (message.content === '-رسالة') {
-    const filter = m => m.author.id === message.author.id;
-    await message.channel.send('**ادخل الرسالة التي تريد إرسالها:**');
-    const collected = await message.channel.awaitMessages({ filter, max: 1, time: 30000 });
-    const userMsg = collected.first();
-    if (!userMsg) return message.channel.send('**لم يتم كتابة أي رسالة.**');
-
-    const messages = await message.channel.messages.fetch({ limit: 50 });
-    const userMessages = messages.filter(m => m.author.id === message.author.id);
-    for (const msg of userMessages.values()) {
-      if (msg.id !== userMsg.id) await msg.delete().catch(() => {});
-    }
-    await message.channel.send(userMsg.content);
-  }
 
   if (message.content.startsWith('-اضافة مهام')) {
     const role = message.mentions.roles.first();
@@ -253,21 +101,6 @@ client.on('messageCreate', async (message) => {
       new ButtonBuilder().setCustomId(`view_tasks_${role.id}`).setLabel('اضغط للمزيد').setStyle(ButtonStyle.Primary)
     );
     await message.channel.send({ content: `**مهام ${role.name} جاهزة للعرض:**`, components: [row] });
-  }
-
-  if (message.content === '-تعميم' && isFullAccess) {
-    const filter = m => m.author.id === message.author.id;
-    await message.channel.send('**اكتب التعميم:**');
-    const msg = (await message.channel.awaitMessages({ filter, max: 1, time: 60000 })).first()?.content;
-    if (!msg) return message.channel.send('**لم يتم إرسال تعميم. <a:pl0:1394782277938057464>**');
-    const embed = new EmbedBuilder().setDescription(`**${msg}**`).setColor('#8B0000');
-    const channel = client.channels.cache.get(ANNOUNCEMENT_CHANNEL_ID);
-    if (channel?.isTextBased()) {
-      await channel.send({ content: '@everyone', embeds: [embed] });
-      await message.channel.send('**تم ارسال التعميم بنجاح <a:pl0:1394782288981528717>**');
-    } else {
-      await message.channel.send('**فشل إرسال التعميم <a:pl0:1394782277938057464>**');
-    }
   }
 
   if (message.content === '-اجتماع' && isFullAccess) {
@@ -308,14 +141,6 @@ client.on('messageCreate', async (message) => {
     const channel = client.channels.cache.get(STARK_MENU_CHANNEL_ID);
     if (channel?.isTextBased()) await channel.send({ embeds: [embed], components: [row] });
   }
-
-  if (message.content.includes('خط')) {
-    await message.delete();
-    const embed = new EmbedBuilder()
-      .setImage('https://media.discordapp.net/attachments/1391556040901918720/1394789215224598658/PL_GANG.jpg')
-      .setColor('#8B0000');
-    await message.channel.send({ embeds: [embed] });
-  }
 });
 
 client.on('channelCreate', async (channel) => {
@@ -323,7 +148,6 @@ client.on('channelCreate', async (channel) => {
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId('claim_ticket').setLabel('استلام التكت').setStyle(ButtonStyle.Success)
   );
-
   if (channel.isTextBased()) {
     setTimeout(async () => {
       const embedBtn = new EmbedBuilder()
@@ -336,32 +160,32 @@ client.on('channelCreate', async (channel) => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-  if (interaction.isButton()) {
-    if (interaction.customId === 'claim_ticket') {
-      const embed = new EmbedBuilder()
-        .setDescription(`**<:PLGANG128x128:1394790202416828596>  تم استلام التكت بنجاح من قبل ${interaction.user} نرجو عدم التدخل على بادن  <a:pl0:1394782277938057464> **`)
-        .setColor('#8B0000');
-      await interaction.message.edit({ embeds: [embed], components: [] });
-      await interaction.reply({ content: '✅', ephemeral: true });
-    }
+  if (!interaction.isButton()) return;
 
-    if (interaction.customId.startsWith('view_tasks_')) {
-      const roleId = interaction.customId.split('view_tasks_')[1];
-      const task = gangTasks.get(roleId);
-      const embed = new EmbedBuilder()
-        .setTitle('**مهام العصابة**')
-        .setDescription(task)
-        .setColor('#8B0000')
-        .setFooter({ text: 'توقيع عائلة ستارك' });
-      const footerRow = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('dummy_footer').setLabel('توقيع عائلة ستارك').setStyle(ButtonStyle.Danger).setDisabled(true)
-      );
-      await interaction.reply({ embeds: [embed], components: [footerRow], ephemeral: true });
-    }
+  if (interaction.customId === 'claim_ticket') {
+    const embed = new EmbedBuilder()
+      .setDescription(`**<:PLGANG128x128:1394790202416828596>  تم استلام التكت بنجاح من قبل ${interaction.user} نرجو عدم التدخل على بادن  <a:pl0:1394782277938057464> **`)
+      .setColor('#8B0000');
+    await interaction.message.edit({ embeds: [embed], components: [] });
+    await interaction.reply({ content: '✅', ephemeral: true });
+  }
 
-    if (interaction.customId.startsWith('soon')) {
-      await interaction.reply({ content: '**قريباً <a:pl0:1394782281683697734>**', ephemeral: true });
-    }
+  if (interaction.customId.startsWith('view_tasks_')) {
+    const roleId = interaction.customId.split('view_tasks_')[1];
+    const task = gangTasks.get(roleId);
+    const embed = new EmbedBuilder()
+      .setTitle('**مهام العصابة**')
+      .setDescription(task)
+      .setColor('#8B0000')
+      .setFooter({ text: 'توقيع عائلة ستارك' });
+    const footerRow = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('dummy_footer').setLabel('توقيع عائلة ستارك').setStyle(ButtonStyle.Danger).setDisabled(true)
+    );
+    await interaction.reply({ embeds: [embed], components: [footerRow], ephemeral: true });
+  }
+
+  if (interaction.customId.startsWith('soon')) {
+    await interaction.reply({ content: '**قريباً <a:pl0:1394782281683697734>**', ephemeral: true });
   }
 });
 
