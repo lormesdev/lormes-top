@@ -29,7 +29,7 @@ client.on('ready', () => {
   });
 });
 
-const FULL_ACCESS_ROLE = '1391555836878393425';
+const FULL_ACCESS_ROLE = '1394974811490619442';
 const ANNOUNCEMENT_CHANNEL_ID = '1391556047990292621';
 const MEETING_CHANNEL_ID = '1391556054327890071';
 const STARK_MENU_CHANNEL_ID = '1391556049273749625';
@@ -165,9 +165,10 @@ client.on('interactionCreate', async (interaction) => {
   if (interaction.isButton()) {
     if (interaction.customId === 'claim_ticket') {
       const embed = new EmbedBuilder()
-        .setDescription('**تم الاستلام، الرجاء عدم التدخل إلا بإذن.**')
+        .setDescription(`**<:PLGANG128x128:1394790202416828596>  تم استلام التكت بنجاح من قبل ${interaction.user} نرجو عدم التدخل على بادن  <a:pl0:1394782277938057464> **`)
         .setColor('#8B0000');
-      await interaction.reply({ embeds: [embed], ephemeral: false });
+      await interaction.message.edit({ embeds: [embed], components: [] });
+      await interaction.reply({ content: '✅', ephemeral: true });
     }
 
     if (interaction.customId.startsWith('view_tasks_')) {
