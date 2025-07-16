@@ -4,6 +4,92 @@ const {
   Client, GatewayIntentBits,
   Partials, EmbedBuilder,
   ActionRowBuilder, ButtonBuilder,
+  ButtonStyle, ActivityType, PresenceUpdateStatus
+} = require('discord.js');
+
+const app = express();
+app.get('/', (req, res) => res.send('✅ Bot is alive!'));
+app.listen(3000, () => console.log('🌐 Uptime server is running.'));
+
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers
+  ],
+  partials: [Partials.Channel]
+});
+
+client.on('ready', () => {
+  console.log(`✅ Logged in as ${client.user.tag}`);
+  client.user.setPresence({
+    activities: [{ name: 'PLRP', type: ActivityType.Playing }],
+    status: PresenceUpdateStatus.DoNotDisturb
+  });
+  sendPromotion();
+  setInterval(sendPromotion, 5 * 60 * 1000); // كل 5 دقايق
+});
+
+const FULL_ACCESS_ROLE = '1394974811490619442';
+const ANNOUNCEMENT_CHANNEL_ID = '1391556047990292621';
+const MEETING_CHANNEL_ID = '1391556054327890071';
+const STARK_MENU_CHANNEL_ID = '1391556049273749625';
+const PROMOTION_CHANNEL_ID = '1395008017044602890';
+const PROMOTION_QUOTES = [
+  '⦿ الزعامة فن، والفرصة بين يديك.',
+  '⦿ كن أنت القائد الذي لا يُنسى.',
+  '⦿ العصابة تنتظرك.. فلا تتأخر.',
+  '⦿ لا أحد يصنع المجد إلا الزعماء.',
+  '⦿ الزعيم لا يُخلق، بل يُثبت نفسه.',
+  '⦿ فرصتك لتكتب اسمك في تاريخ العصابات.',
+  '⦿ لا تتردد، العصابة تنتظر زعيمها.',
+  '⦿ هل لديك الشجاعة لتقود؟',
+  '⦿ الزعامة موقف، وليست منصباً.',
+  '⦿ العصابة القوية تبدأ بفكرة.. وتنتهي بأسطورة.',
+  '⦿ استعد، المجد بانتظارك.',
+  '⦿ القادة لا يولدون.. بل يُختارون.',
+  '⦿ اليوم قائد.. غداً أسطورة.',
+  '⦿ لا تكون تابعاً، كن زعيماً.',
+  '⦿ لا تحتاج إذناً لتبدأ.. فقط ابدأ.',
+  '⦿ العصابات العظيمة تُبنى بالشخصيات العظيمة.',
+  '⦿ لا تنتظر الفرصة.. اصنعها.',
+  '⦿ عش الزعامة، ولا تتقمصها.',
+  '⦿ حين تبدأ عصابتك.. يبدأ المجد.',
+  '⦿ اثبت وجودك، وابدأ عصابتك.',
+  '⦿ في كل زقاق.. زعيم ينتظر.',
+  '⦿ الزعامة لا تعني القوة.. بل السيطرة.',
+  '⦿ افتح عصابتك.. واحكم الشارع.',
+  '⦿ القيادة قرار، فهل قررت؟',
+  '⦿ العصابة حلم.. والزعامة قرار.'
+];
+
+function sendPromotion() {
+  const channel = client.channels.cache.get(PROMOTION_CHANNEL_ID);
+  if (!channel?.isTextBased()) return;
+  const random = PROMOTION_QUOTES[Math.floor(Math.random() * PROMOTION_QUOTES.length)];
+  const embed = new EmbedBuilder()
+    .setTitle('🔥 هل أنت مستعد لتكون زعيم؟')
+    .setDescription(`**${random}**`)
+    .setColor('#8B0000');
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setLabel('موقع العائلة')
+      .setStyle(ButtonStyle.Link)
+      .setURL('https://media.discordapp.net/attachments/1386276858319998976/1394844422184636428/IMG_8322.jpg')
+  );
+
+  channel.send({ embeds: [embed], components: [row] });
+}
+
+// باقي الكود بدون تغيير...
+require('dotenv').config();
+const express = require('express');
+const {
+  Client, GatewayIntentBits,
+  Partials, EmbedBuilder,
+  ActionRowBuilder, ButtonBuilder,
   ButtonStyle
 } = require('discord.js');
 
