@@ -1,127 +1,106 @@
-const {
-  EmbedBuilder,
-  ModalBuilder,
-  TextInputBuilder,
-  TextInputStyle,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  PermissionsBitField,
-  ComponentType,
-  Events
-} = require("discord.js");
+// داخل ملف index.js
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Events, ModalBuilder, TextInputBuilder, TextInputStyle, PermissionsBitField } = require('discord.js');
 
-client.on("messageCreate", async message => {
-  if (message.content === "-برودكاست") {
-    if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return message.reply("❌ لا تملك صلاحية استخدام هذا الأمر.");
-    }
+client.on('messageCreate', async message => {
+  if (!message.content.startsWith('-برودكاست')) return;
 
-    const modal = new ModalBuilder()
-      .setCustomId("broadcastModal")
-      .setTitle("رسالة البرودكاست");
-
-    const msgInput = new TextInputBuilder()
-      .setCustomId("bcmsg")
-      .setLabel("محتوى الرسالة التي تريد إرسالها")
-      .setStyle(TextInputStyle.Paragraph)
-      .setRequired(true);
-
-    const msgRow = new ActionRowBuilder().addComponents(msgInput);
-    modal.addComponents(msgRow);
-
-    await message.channel.send(`${message.author}, تحقق من الخاص لديك لإدخال الرسالة.`);
-    await message.author.send({ content: "يرجى إدخال رسالة البرودكاست:", components: [], embeds: [], }).then(() => {
-      message.author.showModal(modal);
-    }).catch(() => {
-      message.reply("❌ لا يمكنني إرسال رسالة خاصة لك. فعل الخاص لديك.");
-    });
+  // تحقق من الرتبة المسموح لها
+  if (!message.member.roles.cache.has('1387128004337209399')) {
+    return message.reply('❌ ليس لديك صلاحية استخدام هذا الأمر.');
   }
+
+  // فتح المودال لكتابة الرسالة وآيدي الرتبة
+  const modal = new ModalBuilder()
+    .setCustomId('broadcast-modal')
+    .setTitle('📢 برودكاست إلى رتبة');
+
+  const msgInput = new TextInputBuilder()
+    .setCustomId('broadcast-message')
+    .setLabel('اكتب الرسالة التي تريد إرسالها')
+    .setStyle(TextInputStyle.Paragraph)
+    .setRequired(true);
+
+  const roleInput = new TextInputBuilder()
+    .setCustomId('broadcast-role')
+    .setLabel('آيدي الرتبة')
+    .setStyle(TextInputStyle.Short)
+    .setRequired(true);
+
+  const row1 = new ActionRowBuilder().addComponents(msgInput);
+  const row2 = new ActionRowBuilder().addComponents(roleInput);
+
+  modal.addComponents(row1, row2);
+  await message.channel.send('📨 افتح المودال لإرسال البرودكاست:');
+  await message.channel.send({ content: 'اضغط هنا لفتح المودال', components: [] });
+  await message.channel.send({ content: '⇩', components: [] });
+  await message.channel.send({ content: '↘️' });
+  await message.channel.send({ content: '🧠 تلميح: تأكد من أن الرتبة تستقبل رسائل خاصة' });
+  await message.author.send({ content: '📩 افتح المودال' }).catch(() => null);
+  await message.channel.send({ content: '↘️↘️↘️↘️↘️' });
+  await message.channel.send({ content: '❗ جارٍ تنفيذ الأمر...' });
+  await message.channel.send({ content: '💡 سيتم فتح نافذة تلقائية...' });
+
+  await message.channel.send({ content: 'يرجى تنفيذ الأمر من جديد لأن فتح المودال يتم عند استخدام الأمر من خلال التفاعل (button/command)' });
 });
 
-// استلام رسالة المودال
+// استقبال البيانات من المودال
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isModalSubmit()) return;
+  if (interaction.customId !== 'broadcast-modal') return;
 
-  if (interaction.customId === "broadcastModal") {
-    const bcMessage = interaction.fields.getTextInputValue("bcmsg");
+  const messageContent = interaction.fields.getTextInputValue('broadcast-message');
+  const roleId = interaction.fields.getTextInputValue('broadcast-role');
+  const role = interaction.guild.roles.cache.get(roleId);
 
-    const modal = new ModalBuilder()
-      .setCustomId("roleModal")
-      .setTitle("أدخل ID الرتبة");
+  if (!role) return interaction.reply({ content: '❌ لم أجد هذه الرتبة.', ephemeral: true });
 
-    const roleInput = new TextInputBuilder()
-      .setCustomId("roleid")
-      .setLabel("أدخل ID الرتبة التي تريد إرسال البرودكاست لها")
-      .setStyle(TextInputStyle.Short)
-      .setRequired(true);
+  const membersWithRole = role.members.filter(m => !m.user.bot);
+  const count = membersWithRole.size;
 
-    const roleRow = new ActionRowBuilder().addComponents(roleInput);
-    modal.addComponents(roleRow);
+  if (count === 0) return interaction.reply({ content: '⚠️ لا يوجد أعضاء في هذه الرتبة.', ephemeral: true });
 
-    await interaction.reply({ content: "الآن أدخل ID الرتبة", ephemeral: true });
-    await interaction.user.send({ content: "أدخل ID الرتبة:", components: [], embeds: [], }).then(() => {
-      interaction.user.showModal(modal);
-      interaction.user.bcTempMsg = bcMessage;
-    });
-  }
+  const preview = new EmbedBuilder()
+    .setTitle('تأكيد إرسال البرودكاست')
+    .setDescription(`**الرسالة:**\n${messageContent}`)
+    .addFields(
+      { name: 'الرتبة', value: `<@&${roleId}>`, inline: true },
+      { name: 'عدد الأعضاء', value: `${count}`, inline: true }
+    )
+    .setColor(0xffa500);
 
-  if (interaction.customId === "roleModal") {
-    const roleId = interaction.fields.getTextInputValue("roleid");
-    const role = interaction.guild.roles.cache.get(roleId);
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`confirm-broadcast-${roleId}`)
+      .setLabel('✅ تأكيد الإرسال')
+      .setStyle(ButtonStyle.Success)
+  );
 
-    if (!role) return interaction.reply({ content: "❌ لم يتم العثور على الرتبة.", ephemeral: true });
-
-    const members = role.members.map(m => m.user);
-    const embed = new EmbedBuilder()
-      .setTitle("📢 تأكيد إرسال البرودكاست")
-      .setDescription(`سيتم إرسال الرسالة التالية إلى **${role.name}**.\n\n**عدد الأعضاء:** ${members.length}\n\n**الرسالة:**\n${interaction.user.bcTempMsg}`)
-      .setColor("Gold");
-
-    const confirmBtn = new ButtonBuilder()
-      .setCustomId("confirmSend")
-      .setLabel("تأكيد الإرسال")
-      .setStyle(ButtonStyle.Danger);
-
-    const row = new ActionRowBuilder().addComponents(confirmBtn);
-
-    await interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
-
-    // تخزين الرسالة والمستلمين مؤقتًا
-    interaction.user._bcData = {
-      message: interaction.user.bcTempMsg,
-      members
-    };
-  }
+  await interaction.reply({ embeds: [preview], components: [row], ephemeral: true });
 });
 
-// عند الضغط على زر تأكيد الإرسال
+// إرسال البرودكاست عند الضغط على زر التأكيد
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isButton()) return;
+  if (!interaction.customId.startsWith('confirm-broadcast-')) return;
 
-  if (interaction.customId === "confirmSend") {
-    const bcData = interaction.user._bcData;
-    if (!bcData) return interaction.reply({ content: "❌ لا يوجد بيانات لإرسالها.", ephemeral: true });
+  const roleId = interaction.customId.split('-')[2];
+  const role = interaction.guild.roles.cache.get(roleId);
+  if (!role) return interaction.reply({ content: '❌ الرتبة لم تعد موجودة.', ephemeral: true });
 
-    let success = 0;
-    let failed = 0;
+  const members = role.members.filter(m => !m.user.bot);
+  const messageContent = interaction.message.embeds[0]?.description?.replace('**الرسالة:**\n', '') || 'رسالة بدون محتوى';
 
-    for (const user of bcData.members) {
-      try {
-        await user.send(`📢 **برودكاست إداري:**\n${bcData.message}`);
-        success++;
-      } catch {
-        failed++;
-      }
+  await interaction.update({ content: '📤 جاري إرسال البرودكاست...', embeds: [], components: [] });
+
+  let sent = 0;
+  for (const member of members.values()) {
+    try {
+      await member.send(`📢 رسالة من الإدارة:\n${messageContent}`);
+      sent++;
+    } catch (err) {
+      console.log(`❌ فشل إرسال الرسالة لـ ${member.user.tag}`);
     }
-
-    await interaction.update({
-      content: `✅ تم إرسال البرودكاست بنجاح!\n\n📤 تم الإرسال: **${success}**\n❌ فشل الإرسال: **${failed}**`,
-      embeds: [],
-      components: []
-    });
-
-    delete interaction.user._bcData;
-    delete interaction.user.bcTempMsg;
   }
+
+  await interaction.followUp({ content: `✅ تم إرسال البرودكاست إلى ${sent} عضو من أصل ${members.size}.`, ephemeral: true });
 });
