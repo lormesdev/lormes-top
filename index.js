@@ -88,7 +88,7 @@ client.on('messageCreate', async (message) => {
     if (channel?.isTextBased()) await channel.send({ embeds: [embed], components: [row] });
   }
 
-  if (message.content === '-خط') {
+  if (message.content === 'خ') {
     const embed = new EmbedBuilder()
       .setDescription('⦿ الزعامة موقف ، وليست منصباً . <a:pl0:1387387534732034080>')
       .setColor('#8B0000');
