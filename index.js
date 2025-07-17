@@ -24,8 +24,6 @@ const PROMOTION_CHANNEL_ID = '1395008017044602890';
 const TICKET_CATEGORIES = ['1391556033704362064', '1391556034698547200'];
 const gangTasks = new Map();
 
-const SINGLE_PROMOTION_QUOTE = '⦿ الزعامة موقف، وليست منصباً.';
-
 client.on('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
   client.user.setPresence({
@@ -33,37 +31,23 @@ client.on('ready', () => {
     status: PresenceUpdateStatus.DoNotDisturb
   });
 
-  sendPromotion();
-  setInterval(sendPromotion, 5 * 60 * 1000);
+  sendPromotionMessage();
+  setInterval(sendPromotionMessage, 5 * 60 * 1000);
 });
 
-function sendPromotion() {
+let lastPromotionSent = '';
+function sendPromotionMessage() {
   const channel = client.channels.cache.get(PROMOTION_CHANNEL_ID);
   if (!channel?.isTextBased()) return;
-  channel.send(`**${SINGLE_PROMOTION_QUOTE}**`);
+  const msg = '⦿ الزعامة موقف ، وليست منصباً . <a:pl0:1387387534732034080>';
+  if (lastPromotionSent === msg) return;
+  lastPromotionSent = msg;
+  channel.send(msg);
 }
 
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
   const isFullAccess = message.member.roles.cache.has(FULL_ACCESS_ROLE);
-
-  if (message.content.startsWith('-اضافة مهام')) {
-    const role = message.mentions.roles.first();
-    const task = message.content.split(/ +/).slice(2).join(' ');
-    if (!role || !task) return message.reply('**استخدم الأمر بالشكل التالي: `-اضافة مهام @الرتبة المهام`**');
-    gangTasks.set(role.id, task);
-    message.reply('**تم إضافة المهام بنجاح <a:pl0:1394782288981528717>**');
-  }
-
-  if (message.content.startsWith('-مهام')) {
-    const role = message.mentions.roles.first();
-    if (!role || !gangTasks.has(role.id)) return message.reply('**لم يتم العثور على مهام لهذه الرتبة <a:pl0:1394782277938057464>**');
-    const task = gangTasks.get(role.id);
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId(`view_tasks_${role.id}`).setLabel('اضغط للمزيد').setStyle(ButtonStyle.Primary)
-    );
-    await message.channel.send({ content: `**مهام ${role.name} جاهزة للعرض:**`, components: [row] });
-  }
 
   if (message.content === '-اجتماع' && isFullAccess) {
     const filter = m => m.author.id === message.author.id;
@@ -83,102 +67,75 @@ client.on('messageCreate', async (message) => {
       .setColor('#8B0000');
 
     const channel = client.channels.cache.get(MEETING_CHANNEL_ID);
-    if (channel?.isTextBased()) await channel.send({ content: '@everyone', embeds: [embed] });
+    if (channel?.isTextBased()) await channel.send({ embeds: [embed] });
     else message.channel.send('**لم يتم العثور على روم الاجتماعات**');
-  }
-
-  if (message.content.startsWith('-تعميم') && isFullAccess) {
-    const text = message.content.split(' ').slice(1).join(' ');
-    const embed = new EmbedBuilder()
-      .setTitle('تعميم جديد')
-      .setDescription(text || '🔴 تعميم هام لجميع العصابات')
-      .setColor('#8B0000');
-    const channel = client.channels.cache.get(ANNOUNCEMENT_CHANNEL_ID);
-    if (channel?.isTextBased()) channel.send({ content: '@everyone', embeds: [embed] });
-  }
-
-  if (message.content.startsWith('-رسالة') && isFullAccess) {
-    const msg = message.content.slice(7);
-    if (!msg) return message.reply('**اكتب رسالة بعد الأمر.**');
-    message.delete();
-    message.channel.send(msg);
-  }
-
-  if (message.content === '-خط') {
-    const embed = new EmbedBuilder()
-      .setImage('https://media.discordapp.net/attachments/1391556040901918720/1394789215224598658/PL_GANG.jpg')
-      .setColor('#8B0000');
-    message.channel.send({ embeds: [embed] });
   }
 
   if (message.content === '-ستارك') {
     const embed = new EmbedBuilder()
       .setTitle('**AL STARK FAMILY ALERTE <:PLGANG128x128:1394790202416828596>**')
-      .setDescription('<:T5:1394782295474307102> **قسم خاص لعائلة ستارك**')
-      .setImage('https://media.discordapp.net/attachments/1391556049273749625/1395398494570680484/PL_GANG_720_x_280_.jpg')
+      .setDescription('**قسم خاص لعائلة ستارك 💀**')
+      .setImage('https://media.discordapp.net/attachments/1391556049273749625/1395398494570680484/PL_GANG_720_x_280_.jpg?ex=687a4d9e&is=6878fc1e&hm=9abe2ff5758828c18d4d7c97a2dc5eaddf7a5afd984b044738718081ea48131d&=&format=webp')
       .setColor('#8B0000');
 
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('soon1').setLabel('مسؤولين العائلة').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId('soon2').setLabel('شروط الانضمام للتحالف').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId('family_sites').setLabel('مواقع العائلة').setStyle(ButtonStyle.Secondary)
+      new ButtonBuilder().setCustomId('leaders').setLabel('مسؤولين العائلة').setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId('rules').setLabel('شروط الانضمام للتحالف').setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId('locations').setLabel('مواقع العائلة').setStyle(ButtonStyle.Secondary)
     );
 
     const channel = client.channels.cache.get(STARK_MENU_CHANNEL_ID);
     if (channel?.isTextBased()) await channel.send({ embeds: [embed], components: [row] });
   }
-});
 
-client.on('channelCreate', async (channel) => {
-  if (!TICKET_CATEGORIES.includes(channel.parentId)) return;
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('claim_ticket').setLabel('استلام التكت').setStyle(ButtonStyle.Success)
-  );
-  if (channel.isTextBased()) {
-    setTimeout(async () => {
-      const embedBtn = new EmbedBuilder()
-        .setTitle('استلام التكت')
-        .setDescription('**اذا كنت مسؤول اضغط الزر لاستلام التكت**')
-        .setColor('#8B0000');
-      await channel.send({ embeds: [embedBtn], components: [row] });
-    }, 3000);
+  if (message.content === '-خط') {
+    const embed = new EmbedBuilder()
+      .setDescription('⦿ الزعامة موقف ، وليست منصباً . <a:pl0:1387387534732034080>')
+      .setColor('#8B0000');
+    await message.channel.send({ embeds: [embed] });
+  }
+
+  if (message.content.startsWith('-تعميم') && isFullAccess) {
+    const text = message.content.slice(7).trim() || 'يرجى الانتباه إلى التعليمات التالية ...';
+    const embed = new EmbedBuilder()
+      .setTitle('**تعميم من العصابات**')
+      .setDescription(`**${text}**`)
+      .setColor('#8B0000');
+    const channel = client.channels.cache.get(ANNOUNCEMENT_CHANNEL_ID);
+    if (channel?.isTextBased()) {
+      await channel.send({ content: '@everyone', embeds: [embed] });
+    }
   }
 });
 
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isButton()) return;
 
-  if (interaction.customId === 'claim_ticket') {
+  if (interaction.customId === 'locations') {
     const embed = new EmbedBuilder()
-      .setDescription(`**<:PLGANG128x128:1394790202416828596>  تم استلام التكت بنجاح من قبل ${interaction.user} نرجو عدم التدخل على بادن  <a:pl0:1394782277938057464> **`)
-      .setColor('#8B0000');
-    await interaction.message.edit({ embeds: [embed], components: [] });
-    await interaction.reply({ content: '✅', ephemeral: true });
-  }
-
-  if (interaction.customId.startsWith('view_tasks_')) {
-    const roleId = interaction.customId.split('view_tasks_')[1];
-    const task = gangTasks.get(roleId);
-    const embed = new EmbedBuilder()
-      .setTitle('**مهام العصابة**')
-      .setDescription(task)
-      .setColor('#8B0000')
-      .setFooter({ text: 'توقيع عائلة ستارك' });
-    const footerRow = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('dummy_footer').setLabel('توقيع عائلة ستارك').setStyle(ButtonStyle.Danger).setDisabled(true)
-    );
-    await interaction.reply({ embeds: [embed], components: [footerRow], ephemeral: true });
-  }
-
-  if (interaction.customId === 'family_sites') {
-    const embed = new EmbedBuilder()
-      .setImage('https://media.discordapp.net/attachments/1391556040901918720/1395396463806120008/IMG_8322.webp')
+      .setImage('https://media.discordapp.net/attachments/1391556040901918720/1395396463806120008/IMG_8322.webp?ex=687a4bba&is=6878fa3a&hm=32804daa0d1d07fe6c4059c641d15ec59a7bf8e39fe7228b00c7ecb007a2d3de&=&format=webp')
       .setColor('#8B0000');
     await interaction.reply({ embeds: [embed], ephemeral: true });
   }
 
-  if (interaction.customId.startsWith('soon')) {
-    await interaction.reply({ content: '**قريباً <a:pl0:1394782281683697734>**', ephemeral: true });
+  if (interaction.customId === 'rules') {
+    const embed = new EmbedBuilder()
+      .setTitle('**🤝﹣شـروط الـتـحـالـف مـع عـائـلـة سـتـارك <:PLGANG128x128:1394790202416828596>**')
+      .setDescription(`...`)
+      .setColor('#8B0000');
+    await interaction.reply({ embeds: [embed], ephemeral: true });
+  }
+
+  if (interaction.customId === 'leaders') {
+    const embed = new EmbedBuilder()
+      .setTitle('**مسؤولين العائلة القيادات <:PLGANG128x128:1394790202416828596>**')
+      .setDescription(`مسؤول العائلة <a:pl0:1394782277938057464>  <@1343673536186945557>
+
+نائب مسؤول العائلة   <a:pl0:1394782277938057464>  <@1276957785174835222>
+
+هاؤلاء هم المسؤولون الاساسييون للعائلة يعني اي مخالفة لامر منهم وانت داخل التحالف = اعلان الحرب على عصابتك`)
+      .setColor('#8B0000');
+    await interaction.reply({ embeds: [embed], ephemeral: true });
   }
 });
 
