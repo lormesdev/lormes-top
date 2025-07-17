@@ -75,7 +75,7 @@ client.on('messageCreate', async (message) => {
     const embed = new EmbedBuilder()
       .setTitle('**AL STARK FAMILY ALERTE <:PLGANG128x128:1394790202416828596>**')
       .setDescription('**قسم خاص لعائلة ستارك 💀**')
-      .setImage('https://media.discordapp.net/attachments/1391556049273749625/1395398494570680484/PL_GANG_720_x_280_.jpg?ex=687a4d9e&is=6878fc1e&hm=9abe2ff5758828c18d4d7c97a2dc5eaddf7a5afd984b044738718081ea48131d&=&format=webp')
+      .setImage('https://media.discordapp.net/attachments/1391556049273749625/1395398494570680484/PL_GANG_720_x_280_.jpg')
       .setColor('#8B0000');
 
     const row = new ActionRowBuilder().addComponents(
@@ -88,7 +88,7 @@ client.on('messageCreate', async (message) => {
     if (channel?.isTextBased()) await channel.send({ embeds: [embed], components: [row] });
   }
 
-  if (message.content === 'تصير يب يب ') {
+  if (message.content === 'خط') {
     const embed = new EmbedBuilder()
       .setDescription('⦿ الزعامة موقف ، وليست منصباً . <a:pl0:1387387534732034080>')
       .setColor('#8B0000');
@@ -113,7 +113,7 @@ client.on('interactionCreate', async (interaction) => {
 
   if (interaction.customId === 'locations') {
     const embed = new EmbedBuilder()
-      .setImage('https://media.discordapp.net/attachments/1391556040901918720/1395396463806120008/IMG_8322.webp?ex=687a4bba&is=6878fa3a&hm=32804daa0d1d07fe6c4059c641d15ec59a7bf8e39fe7228b00c7ecb007a2d3de&=&format=webp')
+      .setImage('https://media.discordapp.net/attachments/1391556040901918720/1395396463806120008/IMG_8322.webp')
       .setColor('#8B0000');
     await interaction.reply({ embeds: [embed], ephemeral: true });
   }
